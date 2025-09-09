@@ -1,43 +1,43 @@
-using System;
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using System;
 
 public static class LocalizationManager
 {
     public static event Action OnLanguageChanged;
-
-    private const string DatabasePath = "LocalizationDatabase";
+    
     private const string LanguagePlayerPrefsKey = "SelectedLanguage";
-
+    private const string DATABASE_ADDRESS = "LocalizationData";
+    
     private static LocalizationDatabase _database;
     private static string _currentLanguage;
+    private static bool _isInitialized = false;
+    
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static async void Initialize()
+    {
+        await UpdateAndLoadDatabaseAsync();
 
+        if (_database != null)
+        {
+            string defaultLanguage = GetDefaultLanguage();
+            CurrentLanguage = PlayerPrefs.GetString(LanguagePlayerPrefsKey, defaultLanguage);
+        }
+        
+        _isInitialized = true;
+        OnLanguageChanged?.Invoke();
+    }
+    
     public static string CurrentLanguage
     {
-        get
-        {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying)
-            {
-                return EditorPrefs.GetString("EditorLanguage", GetDefaultLanguage());
-            }
-#endif
-            return _currentLanguage;
-        }
+        get => _currentLanguage;
         set
         {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying)
-            {
-                EditorPrefs.SetString("EditorLanguage", value);
-                OnLanguageChanged?.Invoke();
-                return;
-            }
-#endif
             if (_currentLanguage == value) return;
-
+            
             _currentLanguage = value;
             PlayerPrefs.SetString(LanguagePlayerPrefsKey, _currentLanguage);
             PlayerPrefs.Save();
@@ -45,48 +45,35 @@ public static class LocalizationManager
         }
     }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize()
+    private static async UniTask<bool> UpdateAndLoadDatabaseAsync()
     {
-        LoadDatabase();
-        if (_database == null) return;
+        var checkHandle = Addressables.CheckForCatalogUpdates(false);
+        await checkHandle.Task;
 
-        _currentLanguage = PlayerPrefs.GetString(LanguagePlayerPrefsKey, GetDefaultLanguage());
-    }
-
-    private static void LoadDatabase()
-    {
-        if (_database == null)
+        if (checkHandle.Status == AsyncOperationStatus.Succeeded && checkHandle.Result.Count > 0)
         {
-            _database = Resources.Load<LocalizationDatabase>(DatabasePath);
+            Debug.Log("New localization catalog found, downloading updates...");
+            var updateHandle = Addressables.UpdateCatalogs(checkHandle.Result, false);
+            await updateHandle.Task;
+            Addressables.Release(updateHandle);
         }
+        Addressables.Release(checkHandle);
+        
+        Debug.Log("Loading localization database via Addressables...");
+        _database = await Services.Loader.Load<LocalizationDatabase>(DATABASE_ADDRESS);
+        
+        return _database != null;
     }
     
-#if UNITY_EDITOR
-    public static IEnumerable<string> GetAllLocalizationKeys()
-    {
-        LoadDatabase();
-        if (_database != null)
-        {
-            return _database.GetAllKeys();
-        }
-        return new List<string>();
-    }
-#endif
-
     public static string Get(string key, params object[] args)
     {
-        LoadDatabase();
-        if (_database == null)
+        if (!_isInitialized || _database == null)
         {
-            return $"[NO_DB:{key}]";
+            return $"[...]";
         }
 
         string format = _database.GetText(key, CurrentLanguage);
-        if (args == null || args.Length == 0)
-        {
-            return format;
-        }
+        if (args == null || args.Length == 0) return format;
 
         try
         {
@@ -97,24 +84,25 @@ public static class LocalizationManager
             return $"[FORMAT_ERR:{key}]";
         }
     }
-
+    
     public static List<string> GetSupportedLanguages()
     {
-        LoadDatabase();
         return _database != null ? _database.GetSupportedLanguages() : new List<string>();
     }
-
+    
     private static string GetDefaultLanguage()
     {
-        LoadDatabase();
         var languages = GetSupportedLanguages();
         return languages.Count > 0 ? languages[0] : "en";
     }
 
 #if UNITY_EDITOR
-    public static void ForceRefresh()
+    public static IEnumerable<string> GetAllLocalizationKeys()
     {
-        OnLanguageChanged?.Invoke();
+        var db = UnityEditor.AssetDatabase.LoadAssetAtPath<LocalizationDatabase>("Assets/Resources_moved/LocalizationDatabase.asset");
+        return db != null ? db.GetAllKeys() : new List<string>();
     }
+    
+    public static void ForceRefresh() => OnLanguageChanged?.Invoke();
 #endif
 }

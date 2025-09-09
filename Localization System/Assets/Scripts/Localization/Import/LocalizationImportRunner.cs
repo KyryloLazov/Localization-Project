@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class LocalizationImporterRunner
     private const string DATABASE_PATH = "Assets/Resources/LocalizationDatabase.asset";
 
     [MenuItem("Tools/Localization/Import from Google Sheet", false, 0)]
-    public static async void RunImport()
+    public static async UniTask RunImport()
     {
         const string sheetId = "1rWdNUVVotSquMQmITHu4romDAhRLvPQjuAlc6P0slf0";
         const string gid = "0#gid=0";

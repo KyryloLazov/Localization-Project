@@ -1,0 +1,22 @@
+name: Acquire Unity License
+
+on:
+  workflow_dispatch: # Дозволяє запускати вручну
+
+jobs:
+  get-license-file:
+    runs-on: ubuntu-latest
+    steps:
+      # Цей крок генерує файл запиту на активацію (.alf)
+      - name: Get Unity activation file
+        uses: game-ci/unity-request-activation-file@v2
+        with:
+          unityVersion: 6000.2.1f1
+
+      # Цей крок завантажує згенерований .alf файл як артефакт,
+      # щоб ви могли його завантажити на свій комп'ютер
+      - name: Upload activation file
+        uses: actions/upload-artifact@v3
+        with:
+          name: UnityActivationFile
+          path: "Unity_v*.alf" # Шукає файл активації

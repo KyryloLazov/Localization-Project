@@ -1,0 +1,29 @@
+name: Build and Deploy Localization
+
+on:
+  workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions на GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Localization Content with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 6000.2.1f1
+          targetPlatform: StandaloneLinux64 # Для контенту платформа не має значення
+          customParameters: -executeMethod BuildAutomation.BuildLocalization
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MY_GAME_LOCALIZATION }}'
+          projectId: localization-system-4a5c3
+          # Вказуємо, що завантажувати потрібно вміст папки, куди Unity зібрав бандли
+          entryPoint: ${{ format('{0}/ServerData/StandaloneLinux64', env.GITHUB_WORKSPACE) }}
