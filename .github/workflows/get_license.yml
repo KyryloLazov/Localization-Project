@@ -16,7 +16,7 @@ jobs:
       # Цей крок завантажує згенерований .alf файл як артефакт,
       # щоб ви могли його завантажити на свій комп'ютер
       - name: Upload activation file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: UnityActivationFile
           path: "Unity_v*.alf" # Шукає файл активації
