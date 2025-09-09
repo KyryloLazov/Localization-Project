@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class LocalizationEditorHelper
 {
-    private const string DATABASE_PATH = "Assets/Resources/LocalizationDatabase.asset";
+    private const string DATABASE_PATH = "Assets/Resources_moved/LocalizationDatabase.asset";
     private static LocalizationDatabase _cachedDatabase;
 
     public static LocalizationDatabase GetDatabase()
