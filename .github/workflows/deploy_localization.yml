@@ -23,4 +23,4 @@ jobs:
           projectId: localization-system-4a5c3
           channelId: live
           # Єдина важлива частина - вказати, яку папку завантажувати
-          entryPoint: ServerData/StandaloneLinux64
+          entryPoint: Assets/ServerData/Android
