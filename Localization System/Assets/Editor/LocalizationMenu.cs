@@ -18,6 +18,13 @@ namespace Core.Localization.Editor
             Debug.Log("Force Refresh Preview was triggered!");
             LocalizationManager.ForceRefresh();
         }
+        
+        [MenuItem("Tools/Localization/Initialize Manager", false, 12)]
+        private static void InitializeManager()
+        {
+            Debug.Log("Force Initialize Manager was triggered!");
+            LocalizationManager.Initialize();
+        }
     }
 }
 #endif

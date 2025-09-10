@@ -3,10 +3,9 @@ using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
-
 public class LocalizationImporterRunner
 {
-    private const string DATABASE_PATH = "Assets/Resources/LocalizationDatabase.asset";
+    private const string DATABASE_PATH = "Assets/Data/Localization/LocalizationDatabase.asset";
 
     [MenuItem("Tools/Localization/Import from Google Sheet", false, 0)]
     public static async UniTask RunImport()
@@ -22,7 +21,7 @@ public class LocalizationImporterRunner
 
         string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={gid}";
             
-        LocalizationImporter importer = new LocalizationImporter(url);
+        var importer = new LocalizationImporter(url);
         var data = await importer.ImportAsync();
 
         if (data == null || data.Count == 0)
@@ -34,6 +33,11 @@ public class LocalizationImporterRunner
         var database = AssetDatabase.LoadAssetAtPath<LocalizationDatabase>(DATABASE_PATH);
         if (database == null)
         {
+            // Перевіряємо, чи існує папка
+            if (!AssetDatabase.IsValidFolder("Assets/Data/Localization"))
+            {
+                AssetDatabase.CreateFolder("Assets/Data", "Localization");
+            }
             database = ScriptableObject.CreateInstance<LocalizationDatabase>();
             AssetDatabase.CreateAsset(database, DATABASE_PATH);
         }
@@ -44,7 +48,7 @@ public class LocalizationImporterRunner
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[Localization Importer] Import complete. {data.Count} keys updated.");
+        Debug.Log($"[Localization Importer] Import complete. Updated database at: {DATABASE_PATH}");
     }
 }
 #endif

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 7ab8854036f3a2740a5d2dc1c08a04c9
   m_currentHash:
     serializedVersion: 2
-    Hash: 1f18e67ea3ee70bd79cf320d6b0dcb01
+    Hash: 6ab3fdf5d72986b5b210f8f5b89eb774
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -77,11 +77,11 @@ MonoBehaviour:
       - m_Id: 5703b804e3f3cb148881768e40101c0d
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
       - m_Id: e9d42247df61ce742bd8abebb76b6881
-        m_Value: 'ServerData/[BuildTarget]'
+        m_Value: 'Assets/ServerData/[BuildTarget]'
       - m_Id: f8eaad59dad90dd4c95549db9043ddba
-        m_Value: <undefined>
+        m_Value: 'https://localization-system-4a5c3.web.app/[BuildTarget]'
     - m_InheritedParent: 
-      m_Id: 264a660bab04bf241b4b1dbb7d9073c7
+      m_Id: 8463f89930686a44bb79c0a58be2295a
       m_ProfileName: Production
       m_Values:
       - m_Id: 0f880790b6204dd4b9f03b70f8700a02
@@ -91,9 +91,9 @@ MonoBehaviour:
       - m_Id: 5703b804e3f3cb148881768e40101c0d
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
       - m_Id: e9d42247df61ce742bd8abebb76b6881
-        m_Value: 'ServerData/[BuildTarget]'
+        m_Value: 'Assets/ServerData/[BuildTarget]'
       - m_Id: f8eaad59dad90dd4c95549db9043ddba
-        m_Value: https://localization-system-4a5c3.web.app/
+        m_Value: 'https://localization-system-4a5c3.web.app/[BuildTarget]'
     m_ProfileEntryNames:
     - m_Id: 0f880790b6204dd4b9f03b70f8700a02
       m_Name: BuildTarget
@@ -126,4 +126,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2f9fbc2547154c64b80c9d023786247f, type: 2}
   - {fileID: 11400000, guid: 821bdf337e3c5fc4f914843f203f5a2a, type: 2}
   - {fileID: 11400000, guid: 53a5428b50c47a34da7c8860f34537ac, type: 2}
-  m_ActiveProfileId: 264a660bab04bf241b4b1dbb7d9073c7
+  m_ActiveProfileId: 8463f89930686a44bb79c0a58be2295a

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: 7ab8854036f3a2740a5d2dc1c08a04c9
   m_SerializeEntries:
   - m_GUID: c11f0d2b36e02f04f9142e6910fedbd4
-    m_Address: LocalizationDatabase
+    m_Address: LocalizationData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

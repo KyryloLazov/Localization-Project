@@ -17,7 +17,7 @@ public static class LocalizationManager
     private static bool _isInitialized = false;
     
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    private static async void Initialize()
+    public static async void Initialize()
     {
         await UpdateAndLoadDatabaseAsync();
 
@@ -99,7 +99,7 @@ public static class LocalizationManager
 #if UNITY_EDITOR
     public static IEnumerable<string> GetAllLocalizationKeys()
     {
-        var db = UnityEditor.AssetDatabase.LoadAssetAtPath<LocalizationDatabase>("Assets/Resources_moved/LocalizationDatabase.asset");
+        var db = UnityEditor.AssetDatabase.LoadAssetAtPath<LocalizationDatabase>("Assets/Data/Localization/LocalizationDatabase.asset");
         return db != null ? db.GetAllKeys() : new List<string>();
     }
     

@@ -4,40 +4,59 @@ using UnityEngine;
 
 public class LanguageDropdown : MonoBehaviour
 {
-   private TMP_Dropdown _dropdown;
+    private TMP_Dropdown _dropdown;
     void Start()
     {
         _dropdown = GetComponent<TMP_Dropdown>();
-        
-        List<string> languageNames = new List<string>();
-        var languages = LocalizationManager.GetSupportedLanguages();
-
-        foreach (var language in languages)
-        {
-            languageNames.Add(language);
-        }
-        _dropdown.ClearOptions();
-        _dropdown.AddOptions(languageNames);
-        
-        LoadLanguage(languages);
-
         _dropdown.onValueChanged.AddListener(OnLanguageDropdownValueChanged);
+        LocalizationManager.OnLanguageChanged += RefreshDropdownSelection;
+        
+        RefreshDropdownOptions();
     }
 
-    private void LoadLanguage(List<string> languages)
+    private void OnDestroy()
     {
-        string savedLanguage = PlayerPrefs.GetString("SelectedLanguage", languages[0]);
-        int languageIndex = languages.IndexOf(savedLanguage);
+        LocalizationManager.OnLanguageChanged -= RefreshDropdownSelection;
+    }
+
+    private void RefreshDropdownOptions()
+    {
+        var languages = LocalizationManager.GetSupportedLanguages();
+        if (languages.Count == 0)
+        {
+            Debug.Log("No languages available");
+            return;
+        }
+
+        _dropdown.ClearOptions();
+        _dropdown.AddOptions(languages);
+
+        RefreshDropdownSelection();
+    }
+
+    private void RefreshDropdownSelection()
+    {
+        var languages = LocalizationManager.GetSupportedLanguages();
+        if (languages.Count == 0) return;
+
+        string currentLanguage = LocalizationManager.CurrentLanguage;
+        if (string.IsNullOrEmpty(currentLanguage))
+        {
+            currentLanguage = PlayerPrefs.GetString("SelectedLanguage", languages[0]);
+        }
+        
+        int languageIndex = languages.IndexOf(currentLanguage);
         if (languageIndex < 0) languageIndex = 0;
 
-        _dropdown.value = languageIndex;
-        _dropdown.RefreshShownValue();
-
-        LocalizationManager.CurrentLanguage = languages[languageIndex];
+        _dropdown.SetValueWithoutNotify(languageIndex);
     }
-
+    
     private void OnLanguageDropdownValueChanged(int value)
     {
-        LocalizationManager.CurrentLanguage = _dropdown.options[value].text;
+        var languages = LocalizationManager.GetSupportedLanguages();
+        if (value >= 0 && value < languages.Count)
+        {
+            LocalizationManager.CurrentLanguage = languages[value];
+        }
     }
 }
