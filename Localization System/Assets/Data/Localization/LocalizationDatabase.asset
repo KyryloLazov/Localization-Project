@@ -37,13 +37,13 @@ MonoBehaviour:
     Translations:
     - Language: uk
       Text: "\u041B\u0430\u0441\u043A\u0430\u0432\u043E \u043F\u0440\u043E\u0441\u0438\u043C\u043E
-        Update!"
+        Update 22!"
     - Language: en
-      Text: Welcome Update!
+      Text: Welcome Update 22!
     - Language: be
-      Text: Alala Update
+      Text: Alala Update 22
     - Language: de
-      Text: Gutten Tag Update
+      Text: Gutten Tag Update 22
   - Key: Inventory/Currency
     Translations:
     - Language: uk
