@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ] # Запускається при пуші в гілку main
     paths:
-      - 'ServerData/**' # ТІЛЬКИ якщо зміни відбулися в папці ServerData
+      - 'Assets/ServerData/**' # ТІЛЬКИ якщо зміни відбулися в папці ServerData
       
   workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions
 
