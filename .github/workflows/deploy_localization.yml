@@ -11,16 +11,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
+      # 1) Забираємо весь репо
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2) Створюємо папку public та копіюємо туди бандли
+      - name: Copy localization bundles to public
+        run: |
+          rm -rf public
+          mkdir public
+          cp -R "Localization System/Assets/ServerData/Android/." public/
+
+      # 3) Деплоїм на Firebase
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MY_GAME_LOCALIZATION }}
           projectId: localization-system-4a5c3
           channelId: live
-          entryPoint: 'Localization System/Assets/ServerData/Android'
