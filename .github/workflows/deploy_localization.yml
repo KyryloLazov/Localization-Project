@@ -13,14 +13,14 @@ jobs:
       # КРОК 1: АКТИВАЦІЯ. Отримуємо ліцензію за допомогою email/password.
       - name: Activate Unity License
         id: activate # Даємо цьому кроку ID, щоб посилатися на його результат
-        uses: game-ci/unity-activate@v3 # Використовуємо стабільну версію v3
+        uses: game-ci/unity-activate@main # Використовуємо стабільну версію v3
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
           
       # КРОК 2: ЗБІРКА. Використовуємо ліцензію, отриману на кроці 1.
       - name: Build Localization Content with Unity
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@main
         env:
           # Передаємо згенерований ліцензійний файл з кроку "activate"
           UNITY_LICENSE: ${{ steps.activate.outputs.license }} 
