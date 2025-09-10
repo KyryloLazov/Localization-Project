@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      # Шлях відносно кореня репозиторію
+      # Реагуємо на зміни в папці з білдом
       - 'Localization System/Assets/ServerData/Android/**'
-      
+  
   workflow_dispatch:
 
 jobs:
@@ -23,6 +23,3 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}
           projectId: localization-system-4a5c3
-          channelId: live
-          # Явно вказуємо, що завантажувати потрібно папку Android
-          entryPoint: 'Localization System/Assets/ServerData/'
