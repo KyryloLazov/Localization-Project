@@ -11,12 +11,13 @@ jobs:
         uses: actions/checkout@v4
 
       # ЄДИНИЙ КРОК ДЛЯ АКТИВАЦІЇ ТА ЗБІРКИ
+      # Використовуємо @main, щоб отримати найновіший функціонал
       - name: Build Localization Content with Unity
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@main # <-- КЛЮЧОВА ЗМІНА: ВИКОРИСТОВУЄМО @main ЗАМІСТЬ @v4
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
-          # Автентифікація передається прямо сюди
+          # Тепер ці параметри будуть прийняті
           unityEmail: ${{ secrets.UNITY_EMAIL }}
           unityPassword: ${{ secrets.UNITY_PASSWORD }}
           # Інші параметри
