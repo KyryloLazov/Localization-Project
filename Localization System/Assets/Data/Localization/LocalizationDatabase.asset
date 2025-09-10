@@ -16,7 +16,7 @@ MonoBehaviour:
   - Key: UIMenu/Play
     Translations:
     - Language: uk
-      Text: "\u0413\u0440\u0430\u0442\u0438"
+      Text: "\u0413\u0440\u0430\u0442\u04381"
     - Language: en
       Text: Play
     - Language: be
