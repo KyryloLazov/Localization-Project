@@ -10,21 +10,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # КРОК 1: АВТЕНТИФІКАЦІЯ В UNITY (правильний метод)
+      # КРОК 1: АВТЕНТИФІКАЦІЯ В UNITY (з правильним власником)
       - name: Authenticate with Unity
-        uses: game-ci/unity-auth@v2 # <-- ПРАВИЛЬНИЙ ЕКШЕН ДЛЯ ЛОГІНУ
+        uses: webbertakken/unity-auth@v2 # <-- ПРАВИЛЬНА НАЗВА
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
           
-      # КРОК 2: ЗБІРКА КОНТЕНТУ
-      # Цей крок автоматично підхопить автентифікацію з попереднього кроку
+      # КРОК 2: ЗБІРКА КОНТЕНТУ (з правильним власником)
       - name: Build Localization Content with Unity
-        uses: game-ci/unity-builder@v4
+        uses: webbertakken/unity-builder@v4 # <-- ПРАВИЛЬНА НАЗВА
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
-          customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization
+          customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization -nographics
 
       # КРОК 3: ДЕПЛОЙ НА FIREBASE
       - name: Deploy to Firebase Hosting
