@@ -10,24 +10,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # КРОК 1: АКТИВАЦІЯ UNITY ЧЕРЕЗ ЛОГІН І ПАРОЛЬ
+      # КРОК 1: АКТИВАЦІЯ UNITY (виправлена назва екшену)
       - name: Activate Unity License
-        id: activate # Даємо цьому кроку ID, щоб посилатися на його результат
-        uses: game-ci/unity-register@v3
+        id: activate
+        uses: game-ci/unity-activate@v2 # <-- ПРАВИЛЬНА НАЗВА
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
           
-      # КРОК 2: ЗБІРКА КОНТЕНТУ (використовує ліцензію з попереднього кроку)
+      # КРОК 2: ЗБІРКА КОНТЕНТУ
       - name: Build Localization Content with Unity
         uses: game-ci/unity-builder@v4
         env:
-          # Передаємо згенерований ліцензійний файл з кроку "activate"
-          UNITY_LICENSE: ${{ steps.activate.outputs.license-file }} 
+          # Використовуємо правильний вивід "license"
+          UNITY_LICENSE: ${{ steps.activate.outputs.license }} # <-- ПРАВИЛЬНА НАЗВА ВИВОДУ
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
-          # Додаємо -projectPath, щоб уникнути проблем зі знаходженням проєкту
           customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization
 
       # КРОК 3: ДЕПЛОЙ НА FIREBASE
@@ -37,5 +36,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MY_GAME_LOCALIZATION }}'
           projectId: localization-system-4a5c3
-          # Шлях до папки, яку Unity створює після збірки Addressables
           entryPoint: ServerData/StandaloneLinux64
