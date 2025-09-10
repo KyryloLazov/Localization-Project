@@ -2,15 +2,16 @@ name: Deploy Localization to Firebase Hosting
 
 on:
   push:
-    branches: [ main ] # Запускається при пуші в гілку main
+    branches:
+      - main
     paths:
-     - 'Localization System/Assets/ServerData/**' # ТІЛЬКИ якщо зміни відбулися в папці ServerData
-      
-  workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions
+      - 'Localization System/Assets/ServerData/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,9 +19,8 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}'
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}
           projectId: localization-system-4a5c3
           channelId: live
-          # Єдина важлива частина - вказати, яку папку завантажувати
-           entryPoint: .
+          entryPoint: 'Localization System/Assets/ServerData/Android'
