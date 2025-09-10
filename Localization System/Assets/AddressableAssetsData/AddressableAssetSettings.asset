@@ -80,7 +80,7 @@ MonoBehaviour:
       - m_Id: e9d42247df61ce742bd8abebb76b6881
         m_Value: 'Assets/ServerData/[BuildTarget]'
       - m_Id: f8eaad59dad90dd4c95549db9043ddba
-        m_Value: 'https://localization-system-4a5c3.web.app/[UnityEditor.PlayerSettings.bundleVersion]'
+        m_Value: https://localization-system-4a5c3.web.app
     - m_InheritedParent: 
       m_Id: 8463f89930686a44bb79c0a58be2295a
       m_ProfileName: Production
@@ -94,7 +94,7 @@ MonoBehaviour:
       - m_Id: e9d42247df61ce742bd8abebb76b6881
         m_Value: 'Assets/ServerData/[BuildTarget]'
       - m_Id: f8eaad59dad90dd4c95549db9043ddba
-        m_Value: 'https://localization-system-4a5c3.web.app/[UnityEditor.PlayerSettings.bundleVersion]'
+        m_Value: https://localization-system-4a5c3.web.app
     m_ProfileEntryNames:
     - m_Id: 0f880790b6204dd4b9f03b70f8700a02
       m_Name: BuildTarget
