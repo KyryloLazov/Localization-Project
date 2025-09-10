@@ -10,19 +10,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ЄДИНИЙ КРОК ДЛЯ АКТИВАЦІЇ ТА ЗБІРКИ
+      # КРОК 1: АКТИВАЦІЯ. Отримуємо ліцензію за допомогою email/password.
+      # Використовуємо правильну, існуючу версію v2.
+      - name: Activate Unity License
+        id: activate # Даємо цьому кроку ID, щоб посилатися на його результат
+        uses: game-ci/unity-activate@v2 # <-- КЛЮЧОВА ЗМІНА: ПРАВИЛЬНА ВЕРСІЯ
+        with:
+          email: ${{ secrets.UNITY_EMAIL }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+          
+      # КРОК 2: ЗБІРКА. Використовуємо ліцензію, отриману на кроці 1.
       - name: Build Localization Content with Unity
-        uses: game-ci/unity-builder@main # <-- ВИКОРИСТОВУЄМО @main, ЩОБ ОТРИМАТИ НОВИЙ ФУНКЦІОНАЛ
+        uses: game-ci/unity-builder@v4
+        env:
+          # Передаємо згенерований ліцензійний файл з кроку "activate"
+          UNITY_LICENSE: ${{ steps.activate.outputs.license }} 
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
-          # Автентифікація передається прямо сюди
-          unityEmail: ${{ secrets.UNITY_EMAIL }}
-          unityPassword: ${{ secrets.UNITY_PASSWORD }}
-          # Інші параметри
           customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization -nographics
 
-      # КРОК ДЕПЛОЮ (залишається без змін)
+      # КРОК 3: ДЕПЛОЙ НА FIREBASE (цей крок був правильним)
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
