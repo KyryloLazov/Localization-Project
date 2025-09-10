@@ -53,21 +53,22 @@ Library/Bee/*
 Library/com.unity.burst*
 Library/Artifacts/*
 Library/ScriptAssemblies/*
-Library/ShaderCache/
+Library/ShaderCache/*
 Library/ShaderCache/*
 
 # Addressables
-/*.addressables_build/*
+# Індексувати папку ServerData, тому не ігноруємо її
+#/*.addressables_build/*
 
 # ================= #
 # Optional / Builds #
 # ================= #
-# Uncomment if you have build scripts or build output in repo
+# Якщо ви хочете комітити власні збірки, розкоментуйте потрібні рядки
 # /Build/
 # /Builds/
 
 # ==================== #
-# Uncomment to ignore #
+# Uncomment to ignore  #
 # local Crash report   #
 # ============         #
 # CrashReport*.mdmp

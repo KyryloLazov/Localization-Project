@@ -1,40 +1,26 @@
-name: Build and Deploy Localization
+name: Deploy Localization to Firebase Hosting
 
 on:
+  push:
+    branches: [ main ] # Запускається при пуші в гілку main
+    paths:
+      - 'ServerData/**' # ТІЛЬКИ якщо зміни відбулися в папці ServerData
+      
   workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # КРОК 1: АКТИВАЦІЯ. Отримуємо ліцензію за допомогою email/password.
-      # Використовуємо правильну, існуючу версію v2.
-      - name: Activate Unity License
-        id: activate # Даємо цьому кроку ID, щоб посилатися на його результат
-        uses: game-ci/unity-activate@v2 # <-- КЛЮЧОВА ЗМІНА: ПРАВИЛЬНА ВЕРСІЯ
-        with:
-          email: ${{ secrets.UNITY_EMAIL }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-          
-      # КРОК 2: ЗБІРКА. Використовуємо ліцензію, отриману на кроці 1.
-      - name: Build Localization Content with Unity
-        uses: game-ci/unity-builder@v4
-        env:
-          # Передаємо згенерований ліцензійний файл з кроку "activate"
-          UNITY_LICENSE: ${{ steps.activate.outputs.license }} 
-        with:
-          unityVersion: 6000.2.1f1 # Ваша версія Unity
-          targetPlatform: StandaloneLinux64
-          customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization -nographics
-
-      # КРОК 3: ДЕПЛОЙ НА FIREBASE (цей крок був правильним)
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MY_GAME_LOCALIZATION }}'
           projectId: localization-system-4a5c3
+          channelId: live
+          # Єдина важлива частина - вказати, яку папку завантажувати
           entryPoint: ServerData/StandaloneLinux64
