@@ -10,20 +10,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # КРОК 1: АКТИВАЦІЯ UNITY (виправлена назва екшену)
-      - name: Activate Unity License
-        id: activate
-        uses: game-ci/unity-activate@v2 # <-- ПРАВИЛЬНА НАЗВА
+      # КРОК 1: АВТЕНТИФІКАЦІЯ В UNITY (правильний метод)
+      - name: Authenticate with Unity
+        uses: game-ci/unity-auth@v2 # <-- ПРАВИЛЬНИЙ ЕКШЕН ДЛЯ ЛОГІНУ
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
           
       # КРОК 2: ЗБІРКА КОНТЕНТУ
+      # Цей крок автоматично підхопить автентифікацію з попереднього кроку
       - name: Build Localization Content with Unity
         uses: game-ci/unity-builder@v4
-        env:
-          # Використовуємо правильний вивід "license"
-          UNITY_LICENSE: ${{ steps.activate.outputs.license }} # <-- ПРАВИЛЬНА НАЗВА ВИВОДУ
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
