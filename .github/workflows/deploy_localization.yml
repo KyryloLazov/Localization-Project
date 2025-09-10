@@ -5,8 +5,10 @@ on:
     branches:
       - main
     paths:
-      # Реагуємо на зміни в папці з білдом
       - 'Localization System/Assets/ServerData/Android/**'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/**'
   
   workflow_dispatch:
 
@@ -20,6 +22,7 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}
-          projectId: localization-system-4a5c3
+          repoToken:               ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount:  ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCALIZATION_SYSTEM }}
+          projectId:               localization-system-4a5c3
+          channelId:               live
