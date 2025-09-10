@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "Localization System/Assets/ServerData/Android",
+    "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
