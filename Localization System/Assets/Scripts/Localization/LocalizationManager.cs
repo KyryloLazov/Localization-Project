@@ -60,6 +60,7 @@ public static class LocalizationManager
         Addressables.Release(checkHandle);
         
         Debug.Log("Loading localization database via Addressables...");
+        GameInitializer.Initialize();
         _database = await Services.Loader.Load<LocalizationDatabase>(DATABASE_ADDRESS);
         
         return _database != null;
@@ -67,9 +68,14 @@ public static class LocalizationManager
     
     public static string Get(string key, params object[] args)
     {
-        if (!_isInitialized || _database == null)
+        if (!_isInitialized)
         {
-            return $"[...]";
+            return $"Not initialized";
+        }
+
+        if (_database == null)
+        {
+            return $"data base {DATABASE_ADDRESS} not found";
         }
 
         string format = _database.GetText(key, CurrentLanguage);
