@@ -1,0 +1,1 @@
+C:\Users\User\Localization-Project\Localization System\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\39g2c16m\obj\arm64-v8a
