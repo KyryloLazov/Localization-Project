@@ -8,24 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Оновлено до v4 для надійності
 
-      # КРОК 1: АВТЕНТИФІКАЦІЯ В UNITY (з правильним власником)
+      # КРОК 1: АВТЕНТИФІКАЦІЯ В UNITY (правильний екшен та власник)
       - name: Authenticate with Unity
-        uses: webbertakken/unity-auth@v2 # <-- ПРАВИЛЬНА НАЗВА
+        uses: game-ci/unity-auth@v4 # <-- ПРАВИЛЬНИЙ ЕКШЕН І ВЛАСНИК
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
           
-      # КРОК 2: ЗБІРКА КОНТЕНТУ (з правильним власником)
+      # КРОК 2: ЗБІРКА КОНТЕНТУ (правильний екшен та власник)
       - name: Build Localization Content with Unity
-        uses: webbertakken/unity-builder@v4 # <-- ПРАВИЛЬНА НАЗВА
+        uses: game-ci/unity-builder@v4 # <-- ПРАВИЛЬНИЙ ЕКШЕН І ВЛАСНИК
         with:
           unityVersion: 6000.2.1f1 # Ваша версія Unity
           targetPlatform: StandaloneLinux64
           customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization -nographics
 
-      # КРОК 3: ДЕПЛОЙ НА FIREBASE
+      # КРОК 3: ДЕПЛОЙ НА FIREBASE (цей крок був правильним)
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
