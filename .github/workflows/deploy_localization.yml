@@ -1,7 +1,7 @@
 name: Build and Deploy Localization
 
 on:
-  workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions на GitHub
+  workflow_dispatch: # Дозволяє запускати вручну з вкладки Actions
 
 jobs:
   build-and-deploy:
@@ -10,20 +10,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # КРОК 1: АКТИВАЦІЯ UNITY ЧЕРЕЗ ЛОГІН І ПАРОЛЬ
+      - name: Activate Unity License
+        id: activate # Даємо цьому кроку ID, щоб посилатися на його результат
+        uses: game-ci/unity-register@v3
+        with:
+          email: ${{ secrets.UNITY_EMAIL }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+          
+      # КРОК 2: ЗБІРКА КОНТЕНТУ (використовує ліцензію з попереднього кроку)
       - name: Build Localization Content with Unity
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          # Передаємо згенерований ліцензійний файл з кроку "activate"
+          UNITY_LICENSE: ${{ steps.activate.outputs.license-file }} 
         with:
-          unityVersion: 6000.2.1f1
-          targetPlatform: StandaloneLinux64 # Для контенту платформа не має значення
-          customParameters: -executeMethod BuildAutomation.BuildLocalization
+          unityVersion: 6000.2.1f1 # Ваша версія Unity
+          targetPlatform: StandaloneLinux64
+          # Додаємо -projectPath, щоб уникнути проблем зі знаходженням проєкту
+          customParameters: -projectPath . -executeMethod BuildAutomation.BuildLocalization
 
+      # КРОК 3: ДЕПЛОЙ НА FIREBASE
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MY_GAME_LOCALIZATION }}'
           projectId: localization-system-4a5c3
-          # Вказуємо, що завантажувати потрібно вміст папки, куди Unity зібрав бандли
-          entryPoint: ${{ format('{0}/ServerData/StandaloneLinux64', env.GITHUB_WORKSPACE) }}
+          # Шлях до папки, яку Unity створює після збірки Addressables
+          entryPoint: ServerData/StandaloneLinux64
