@@ -28,6 +28,14 @@ using UnityEngine;
             {
                 BuildRuntimeData();
             }
+            
+            if (_runtimeData == null || _runtimeData.Count == 0)
+            {
+                return $"[NO_DATA:{key}]";
+            }
+            
+            if (string.IsNullOrWhiteSpace(key))
+                    return "";
 
             if (_runtimeData.TryGetValue(key, out var languageMap))
             {
@@ -42,6 +50,11 @@ using UnityEngine;
         
         public List<string> GetSupportedLanguages()
         {
+            if (_runtimeData == null)
+            {
+                BuildRuntimeData();
+            }
+            
             if (_runtimeData == null || _runtimeData.Count == 0)
             {
                 return new List<string>();

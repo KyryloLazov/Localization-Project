@@ -24,11 +24,17 @@ public class PlayerInfo : MonoBehaviour
     {
         _text = GetComponent<TextMeshProUGUI>();
 
-        SetText();
+        //SetText();
     }
 
     private void SetText()
     {
+        if (string.IsNullOrWhiteSpace(_key))
+        {
+            _text.text = "";
+            return;
+        }
+        
         _text.text = LocalizationManager.Get(_key, _playerName == "" ? null : _playerName, _age > 0 ? _age : null);
     }
 }

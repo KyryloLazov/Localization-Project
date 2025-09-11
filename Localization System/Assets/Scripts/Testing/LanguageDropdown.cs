@@ -1,16 +1,25 @@
 using System.Collections.Generic;
+using System.Linq;
+using Cysharp.Threading.Tasks; // <-- Додайте using
 using TMPro;
 using UnityEngine;
 
 public class LanguageDropdown : MonoBehaviour
 {
     private TMP_Dropdown _dropdown;
+
     void Start()
     {
         _dropdown = GetComponent<TMP_Dropdown>();
         _dropdown.onValueChanged.AddListener(OnLanguageDropdownValueChanged);
         LocalizationManager.OnLanguageChanged += RefreshDropdownSelection;
         
+        DelayedInitialization().Forget();
+    }
+    
+    private async UniTask DelayedInitialization()
+    {
+        await UniTask.WaitForSeconds(0.1f); 
         RefreshDropdownOptions();
     }
 
@@ -24,12 +33,14 @@ public class LanguageDropdown : MonoBehaviour
         var languages = LocalizationManager.GetSupportedLanguages();
         if (languages.Count == 0)
         {
-            Debug.Log("No languages available");
+            Debug.LogWarning("LanguageDropdown: No languages available from LocalizationManager.");
             return;
         }
-
+        
         _dropdown.ClearOptions();
-        _dropdown.AddOptions(languages);
+        
+        var options = languages.Select(lang => new TMP_Dropdown.OptionData(lang)).ToList();
+        _dropdown.options = options;
 
         RefreshDropdownSelection();
     }
@@ -40,23 +51,22 @@ public class LanguageDropdown : MonoBehaviour
         if (languages.Count == 0) return;
 
         string currentLanguage = LocalizationManager.CurrentLanguage;
-        if (string.IsNullOrEmpty(currentLanguage))
-        {
-            currentLanguage = PlayerPrefs.GetString("SelectedLanguage", languages[0]);
-        }
         
         int languageIndex = languages.IndexOf(currentLanguage);
-        if (languageIndex < 0) languageIndex = 0;
+        if (languageIndex < 0)
+        {
+            languageIndex = 0;
+            LocalizationManager.CurrentLanguage = languages[languageIndex];
+        }
 
         _dropdown.SetValueWithoutNotify(languageIndex);
     }
     
     private void OnLanguageDropdownValueChanged(int value)
     {
-        var languages = LocalizationManager.GetSupportedLanguages();
-        if (value >= 0 && value < languages.Count)
+        if (value >= 0 && value < _dropdown.options.Count)
         {
-            LocalizationManager.CurrentLanguage = languages[value];
+            LocalizationManager.CurrentLanguage = _dropdown.options[value].text;
         }
     }
 }

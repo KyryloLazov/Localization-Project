@@ -33,7 +33,6 @@ public class LocalizationImporterRunner
         var database = AssetDatabase.LoadAssetAtPath<LocalizationDatabase>(DATABASE_PATH);
         if (database == null)
         {
-            // Перевіряємо, чи існує папка
             if (!AssetDatabase.IsValidFolder("Assets/Data/Localization"))
             {
                 AssetDatabase.CreateFolder("Assets/Data", "Localization");

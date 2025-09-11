@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System;
+using UnityEditor;
 
 public static class LocalizationManager
 {
@@ -15,12 +16,52 @@ public static class LocalizationManager
     private static LocalizationDatabase _database;
     private static string _currentLanguage;
     private static bool _isInitialized = false;
+    public static bool IsInitialized => _isInitialized;
+    
+#if UNITY_EDITOR
+    static LocalizationManager()
+    {
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        if (!EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            InitializeForEditor();
+        }
+    }
+
+    private static void OnPlayModeStateChanged(PlayModeStateChange state)
+    {
+        if (state == PlayModeStateChange.ExitingEditMode)
+        {
+            _database = null;
+            _isInitialized = false;
+        }
+        if (state == PlayModeStateChange.EnteredEditMode)
+        {
+            InitializeForEditor();
+        }
+    }
+
+    private static void InitializeForEditor()
+    {
+        Debug.Log("Initializing LocalizationManager for Editor...");
+        _database = AssetDatabase.LoadAssetAtPath<LocalizationDatabase>("Assets/Data/Localization/LocalizationDatabase.asset");
+        if (_database != null)
+        {
+            CurrentLanguage = EditorPrefs.GetString("EditorLanguage", GetDefaultLanguage());
+            _isInitialized = true;
+            OnLanguageChanged?.Invoke();
+        }
+    }
+#endif
     
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static async void Initialize()
     {
-        await UpdateAndLoadDatabaseAsync();
+        // Цей метод тепер буде працювати тільки для Play Mode та білдів
+        if (_isInitialized) return;
 
+        await UpdateAndLoadDatabaseAsync();
+        
         if (_database != null)
         {
             string defaultLanguage = GetDefaultLanguage();
@@ -33,13 +74,30 @@ public static class LocalizationManager
     
     public static string CurrentLanguage
     {
-        get => _currentLanguage;
+        get
+        {
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                return EditorPrefs.GetString("EditorLanguage", "en");
+            }
+#endif
+            return _currentLanguage;
+        }
         set
         {
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                EditorPrefs.SetString("EditorLanguage", value);
+                OnLanguageChanged?.Invoke();
+                return;
+            }
+#endif
             if (_currentLanguage == value) return;
             
             _currentLanguage = value;
-            PlayerPrefs.SetString(LanguagePlayerPrefsKey, _currentLanguage);
+            PlayerPrefs.SetString(LanguagePlayerPrefsKey, value);
             PlayerPrefs.Save();
             OnLanguageChanged?.Invoke();
         }
@@ -60,7 +118,7 @@ public static class LocalizationManager
         Addressables.Release(checkHandle);
         
         Debug.Log("Loading localization database via Addressables...");
-        GameInitializer.Initialize();
+
         _database = await Services.Loader.Load<LocalizationDatabase>(DATABASE_ADDRESS);
         
         return _database != null;
@@ -68,6 +126,15 @@ public static class LocalizationManager
     
     public static string Get(string key, params object[] args)
     {
+#if UNITY_EDITOR
+        if (!EditorApplication.isPlaying && !_isInitialized)
+        {
+            InitializeForEditor();
+        }
+#endif
+        if (string.IsNullOrWhiteSpace(key))
+            return "";
+        
         if (!_isInitialized)
         {
             return $"Not initialized";

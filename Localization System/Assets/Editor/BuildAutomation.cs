@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class BuildAutomation
 {
-    // Метод тепер є "async void"
     [MenuItem("Tools/Build/Build Localization For Server")]
     public static async void BuildLocalization()
     {
@@ -15,12 +14,10 @@ public class BuildAutomation
 
         try
         {
-            // Крок 1: Тепер ми використовуємо неблокуючий "await"
             Debug.Log("Step 1/3: Importing data from Google Sheet...");
             await LocalizationImporterRunner.RunImport();
             Debug.Log("Import finished successfully.");
-
-            // Крок 2: Встановлюємо профіль 'Production'
+            
             Debug.Log("Step 2/3: Setting Addressables profile to 'Production'...");
             string profileId = AddressableAssetSettingsDefaultObject.Settings.profileSettings.GetProfileId("Production");
             if (string.IsNullOrEmpty(profileId))
@@ -30,8 +27,7 @@ public class BuildAutomation
             }
             AddressableAssetSettingsDefaultObject.Settings.activeProfileId = profileId;
             Debug.Log("Profile set.");
-
-            // Крок 3: Збираємо Addressables
+            
             Debug.Log("Step 3/3: Building Addressables content...");
             AddressableAssetSettings.CleanPlayerContent();
             AddressableAssetSettings.BuildPlayerContent();

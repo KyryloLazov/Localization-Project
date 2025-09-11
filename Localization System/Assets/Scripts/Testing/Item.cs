@@ -23,7 +23,7 @@ public class Item : MonoBehaviour
     {
         _text = GetComponent<TextMeshProUGUI>();
 
-        SetText();
+        //SetText();
     }
 
     private void SetText()

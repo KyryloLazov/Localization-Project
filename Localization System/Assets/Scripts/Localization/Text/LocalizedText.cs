@@ -25,7 +25,7 @@ public class LocalizedText : MonoBehaviour
         TryGetComponent(out _tmpText);
 
         LocalizationManager.OnLanguageChanged += UpdateText;
-        UpdateText();
+        //UpdateText();
     }
 
     private void OnDisable()
@@ -35,8 +35,15 @@ public class LocalizedText : MonoBehaviour
 
     private void OnValidate()
     {
+        if (string.IsNullOrEmpty(_localizationKey))
+        {
+            SetTextComponents("");
+            return;
+        }
+        
         if (string.IsNullOrEmpty(_localizationKey)) return;
-        UpdateText();
+        
+        if(LocalizationManager.IsInitialized) UpdateText();
     }
 
     public void SetKey(string newKey)
@@ -49,6 +56,7 @@ public class LocalizedText : MonoBehaviour
     {
         if (!enabled || string.IsNullOrWhiteSpace(_localizationKey))
         {
+            SetTextComponents("");
             return;
         }
 
@@ -62,6 +70,19 @@ public class LocalizedText : MonoBehaviour
         if (_tmpText != null)
         {
             _tmpText.text = value;
+        }
+    }
+    
+    private void SetTextComponents(string text)
+    {
+        if (_uiText != null)
+        {
+            _uiText.text = text;
+        }
+
+        if (_tmpText != null)
+        {
+            _tmpText.text = text;
         }
     }
 
