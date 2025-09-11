@@ -19,7 +19,7 @@ public class LanguageDropdown : MonoBehaviour
     
     private async UniTask DelayedInitialization()
     {
-        await UniTask.WaitForSeconds(0.1f); 
+        await UniTask.WaitForSeconds(0.5f); 
         RefreshDropdownOptions();
     }
 
