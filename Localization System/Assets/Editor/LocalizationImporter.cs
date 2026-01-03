@@ -12,7 +12,7 @@ public static class LocalizationImporter
 {
     private const string EDITOR_DB_PATH  = "Assets/Data/Localization/LocalizationDatabase.asset";
     private const string RUNTIME_DB_PATH = "Assets/Resources/Localization/LocalizationDatabase.asset";
-    private const string REMOTE_URL      = "https://testconfigs-c3b83.web.app/localization/localization.config.json";
+    private const string REMOTE_URL      = "https://localization-system-4a5c3.web.app/localization/localization.config.json";
 
     [MenuItem("Tools/Localization/Update From Remote (Data+Resources)")]
     public static async void UpdateLocalDatabase()
