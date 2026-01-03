@@ -1,0 +1,59 @@
+{
+  "uk": {
+    "UIMenu": {
+      "Play": "Грати!!!!222222",
+      "Settings": "Налаштування"
+    },
+    "General": {
+      "Welcome": "Ласкаво просимо!"
+    },
+    "Inventory": {
+      "Currency": "У вас {0} кристалів"
+    },
+    "Player": {
+      "Info": "Ім'я {0} вік {1}",
+      "Level": "Рівень гравця"
+    },
+    "UIGame": {
+      "Distance": "Дистанція: {0} метрів"
+    }
+  },
+  "en": {
+    "UIMenu": {
+      "Play": "Play22",
+      "Settings": "Settings"
+    },
+    "General": {
+      "Welcome": "Welcome!"
+    },
+    "Inventory": {
+      "Currency": "You have {0} crystals"
+    },
+    "Player": {
+      "Info": "Name {0} age {1}",
+      "Level": "Player level"
+    },
+    "UIGame": {
+      "Distance": "Distance: {0} meters"
+    }
+  },
+  "ru": {
+    "UIMenu": {
+      "Play": "Играть",
+      "Settings": "Настройки"
+    },
+    "General": {
+      "Welcome": "Добро пожаловать!"
+    },
+    "Inventory": {
+      "Currency": "У вас {0} кристалов"
+    },
+    "Player": {
+      "Info": "Имя {0} возраст {1}",
+      "Level": "Уровень игрока"
+    },
+    "UIGame": {
+      "Distance": "Дистанция: {0} метров"
+    }
+  }
+}
