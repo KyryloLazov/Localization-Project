@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine;
+using UnityEngine; // Потрібен для Debug.Log
 
 namespace Core.Localization.Editor
 {
@@ -11,20 +11,13 @@ namespace Core.Localization.Editor
         {
             LanguageSelectorWindow.ShowWindow();
         }
-
-        [MenuItem("Tools/Localization/Force Refresh Preview", false, 12)]
-        private static void RefreshPreview()
-        {
-            Debug.Log("Force Refresh Preview was triggered!");
-            LocalizationManager.ForceRefresh();
-        }
         
-        [MenuItem("Tools/Localization/Initialize Manager", false, 12)]
-        private static void InitializeManager()
-        {
-            Debug.Log("Force Initialize Manager was triggered!");
-            LocalizationManager.Initialize();
-        }
+        // [MenuItem("Tools/Localization/Force Refresh Preview", false, 12)]
+        // private static void RefreshPreview()
+        // {
+        //     Debug.Log("Force Refresh Preview was triggered!");
+        //     LocalizationManager.ForceRefresh();
+        // }
     }
 }
 #endif

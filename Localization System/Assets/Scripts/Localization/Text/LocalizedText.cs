@@ -1,49 +1,75 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using UnityEditor;
 #endif
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 [ExecuteAlways]
 [DisallowMultipleComponent]
-public class LocalizedText : MonoBehaviour
+public class LocalizedTextUI : MonoBehaviour
 {
 #if UNITY_EDITOR
     [ValueDropdown("GetAllLocalizationKeys", NumberOfItemsBeforeEnablingSearch = 15)]
 #endif
     [SerializeField]
     private string _localizationKey;
+    [SerializeField]
+    private bool _applyFont = true;
+    [SerializeField]
+    private FontType _fontType = FontType.Text;
 
     private Text _uiText;
     private TMP_Text _tmpText;
+    private LocalizationFontService _fontService;
 
-    private void OnEnable()
+    [Inject]
+    public void Construct(LocalizationFontService fontService)
+    {
+        _fontService = fontService;
+    }
+    
+    private void Awake()
     {
         TryGetComponent(out _uiText);
         TryGetComponent(out _tmpText);
+    }
 
-        LocalizationManager.OnLanguageChanged += UpdateText;
-        //UpdateText();
+    private void Start()
+    {
+        if (Application.isPlaying)
+        {
+            UpdateText();
+            UpdateFont();
+        }
+    }
+
+    private void OnEnable()
+    {
+        LocalizationManager.OnLanguageChanged += HandleLanguageChange;
+        if (_applyFont && _fontService != null)
+            _fontService.OnFontsChanged += UpdateFont;
+        
+        if (LocalizationManager.IsInitialized)
+        {
+            HandleLanguageChange();
+        }
     }
 
     private void OnDisable()
     {
-        LocalizationManager.OnLanguageChanged -= UpdateText;
+        LocalizationManager.OnLanguageChanged -= HandleLanguageChange;
+        if (_applyFont && _fontService != null)
+            _fontService.OnFontsChanged -= UpdateFont;
     }
-
-    private void OnValidate()
+    
+    private void HandleLanguageChange()
     {
-        if (string.IsNullOrEmpty(_localizationKey))
-        {
-            SetTextComponents("");
-            return;
-        }
-        
-        if (string.IsNullOrEmpty(_localizationKey)) return;
-        
-        if(LocalizationManager.IsInitialized) UpdateText();
+        UpdateText();
+        UpdateFont();
     }
 
     public void SetKey(string newKey)
@@ -54,35 +80,26 @@ public class LocalizedText : MonoBehaviour
 
     private void UpdateText()
     {
-        if (!enabled || string.IsNullOrWhiteSpace(_localizationKey))
-        {
-            SetTextComponents("");
-            return;
-        }
-
-        string value = LocalizationManager.Get(_localizationKey);
-
-        if (_uiText != null)
-        {
-            _uiText.text = value;
-        }
-
-        if (_tmpText != null)
-        {
-            _tmpText.text = value;
-        }
+        if (!enabled) return;
+        string value = string.IsNullOrWhiteSpace(_localizationKey)
+            ? ""
+            : LocalizationManager.Get(_localizationKey);
+        if (_uiText != null) _uiText.text = value;
+        if (_tmpText != null) _tmpText.text = value;
     }
-    
-    private void SetTextComponents(string text)
-    {
-        if (_uiText != null)
-        {
-            _uiText.text = text;
-        }
 
-        if (_tmpText != null)
+    private void UpdateFont()
+    {
+        if (!enabled || !_applyFont || _fontService == null || _tmpText == null) return;
+        
+        TMP_FontAsset font = _fontService.GetCurrentFont(_fontType);
+        
+        if (font != null)
         {
-            _tmpText.text = text;
+            if (_tmpText.font != font)
+            {
+                _tmpText.font = font;
+            }
         }
     }
 
@@ -90,6 +107,14 @@ public class LocalizedText : MonoBehaviour
     private static IEnumerable<string> GetAllLocalizationKeys()
     {
         return LocalizationManager.GetAllLocalizationKeys();
+    }
+    private void OnValidate()
+    {
+        if (Application.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode) return;
+        TryGetComponent(out _tmpText);
+        TryGetComponent(out _uiText);
+        if (LocalizationManager.IsInitialized)
+            UpdateText();
     }
 #endif
 }
