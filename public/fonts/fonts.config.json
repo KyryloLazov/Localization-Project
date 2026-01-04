@@ -1,0 +1,13 @@
+{
+  "FontsConfig.ENG_HeaderFonts": "OpenSans",
+  "FontsConfig.ENG_TextFonts": "OpenSans",
+  "FontsConfig.ENG_DownloadedFonts": "OpenSans",
+  "FontsConfig.RU_HeaderFonts": "OpenSans",
+  "FontsConfig.RU_TextFonts": "OpenSans",
+  "FontsConfig.RU_DownloadedFonts": "Arial",
+  "FontsConfig.UA_HeaderFonts": "OpenSans",
+  "FontsConfig.UA_TextFonts": "OpenSans",
+  "FontsConfig.UA_DownloadedFonts": "Lexend",
+  "FontsConfig.GE_HeaderFonts": "OpenSans",
+  "FontsConfig.GE_TextFonts": "OpenSans"
+}
