@@ -26,7 +26,7 @@ public class AddressablesLoader : IAddressablesLoader
         try { asset = await Addressables.LoadAssetAsync<T>(address).Task; }
         catch (System.Exception e) { Debug.LogError("[AddressablesLoader] " + e); }
 
-        if (asset != null && !(asset is LiveConfigSO))
+        if (asset != null)
             _cache[address] = asset;
 
         return asset;

@@ -1,20 +1,14 @@
-#if UNITY_EDITOR
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using UnityEditor;
-#endif
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
-[ExecuteAlways]
-[DisallowMultipleComponent]
 public class LocalizedTextUI : MonoBehaviour
 {
-#if UNITY_EDITOR
-    [ValueDropdown("GetAllLocalizationKeys", NumberOfItemsBeforeEnablingSearch = 15)]
-#endif
     [SerializeField]
     private string _localizationKey;
     [SerializeField]
@@ -50,6 +44,8 @@ public class LocalizedTextUI : MonoBehaviour
     private void OnEnable()
     {
         LocalizationManager.OnLanguageChanged += HandleLanguageChange;
+        LocalizationManager.OnInitialized += HandleLanguageChange;
+
         if (_applyFont && _fontService != null)
             _fontService.OnFontsChanged += UpdateFont;
         
@@ -62,6 +58,8 @@ public class LocalizedTextUI : MonoBehaviour
     private void OnDisable()
     {
         LocalizationManager.OnLanguageChanged -= HandleLanguageChange;
+        LocalizationManager.OnInitialized -= HandleLanguageChange;
+
         if (_applyFont && _fontService != null)
             _fontService.OnFontsChanged -= UpdateFont;
     }
@@ -81,9 +79,11 @@ public class LocalizedTextUI : MonoBehaviour
     private void UpdateText()
     {
         if (!enabled) return;
+        
         string value = string.IsNullOrWhiteSpace(_localizationKey)
             ? ""
             : LocalizationManager.Get(_localizationKey);
+            
         if (_uiText != null) _uiText.text = value;
         if (_tmpText != null) _tmpText.text = value;
     }
@@ -94,12 +94,9 @@ public class LocalizedTextUI : MonoBehaviour
         
         TMP_FontAsset font = _fontService.GetCurrentFont(_fontType);
         
-        if (font != null)
+        if (font != null && _tmpText.font != font)
         {
-            if (_tmpText.font != font)
-            {
-                _tmpText.font = font;
-            }
+            _tmpText.font = font;
         }
     }
 

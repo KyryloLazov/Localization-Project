@@ -5,145 +5,125 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Zenject;
 
 public class LocalizationService : IInitializable
 {
-    private const string TAG = "[Localization]";
     private const string ADDR_KEY = "LocalizationDatabase";
     private const string RES_PATH = "Localization/LocalizationDatabase";
 
     private readonly IRemoteTextProvider _remote;
-    private readonly string _url;
+    private readonly LocalizationFontService _fontService;
+    private readonly string _locUrl;
+    private readonly string _fontsUrl;
     private readonly bool _useRemote;
 
     public LocalizationService(
         IRemoteTextProvider remote,
-        [Inject(Id = "LocalizationUrl")] string url,
-        [Inject(Id = "UseRemoteLocalization")] bool useRemote = true)
+        LocalizationFontService fontService,
+        [Inject(Id = "LocalizationUrl")] string locUrl,
+        [Inject(Id = "FontsUrl")] string fontsUrl,
+        [Inject(Id = "UseRemote")] bool useRemote)
     {
         _remote = remote;
-        _url = url;
+        _fontService = fontService;
+        _locUrl = locUrl;
+        _fontsUrl = fontsUrl;
         _useRemote = useRemote;
     }
 
     public async void Initialize()
     {
-        try
-        {
-            bool localLoaded = await TryLoadLocalAsync();
+        bool localLoaded = await TryLoadLocalAsync();
+        Debug.Log($"[Localization] Local load result: {localLoaded}");
 
-            if (_useRemote)
-            {
-                await LoadRemote(updateExisting: localLoaded);
-            }
-        }
-        catch (Exception e)
+        if (_useRemote)
         {
-            Debug.LogWarning($"{TAG} Initialize EXC: {e}");
+            Debug.Log("[Localization] Starting remote load...");
+            await UniTask.WhenAll(LoadRemoteTranslations(), LoadRemoteFonts());
         }
+        
+        LocalizationManager.IsInitialized = true;
     }
 
     private async UniTask<bool> TryLoadLocalAsync()
     {
-        IResourceLocator initLocator = null;
         try
         {
-            var init = Addressables.InitializeAsync();
-            await init.Task;
-            initLocator = init.Result;
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"{TAG} Addressables init EXC: {e}");
-        }
-
-        bool keyLocated = false;
-        try
-        {
+            await Addressables.InitializeAsync();
+            bool keyFound = false;
             foreach (var loc in Addressables.ResourceLocators)
             {
-                if (loc.Locate(ADDR_KEY, typeof(LocalizationDatabase), out var _))
-                {
-                    keyLocated = true;
-                    break;
-                }
+                if (loc.Locate(ADDR_KEY, typeof(LocalizationDatabase), out _)) { keyFound = true; break; }
             }
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"{TAG} Locate EXC: {e}");
-        }
 
-        if (keyLocated)
-        {
-            AsyncOperationHandle<LocalizationDatabase> handle = default;
-            try
+            if (keyFound)
             {
-                handle = Addressables.LoadAssetAsync<LocalizationDatabase>(ADDR_KEY);
+                var handle = Addressables.LoadAssetAsync<LocalizationDatabase>(ADDR_KEY);
                 await handle.Task;
-                
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null)
                 {
-                    var dict = handle.Result.ToDictionary();
-                    LogDbPreview(dict, "ADDR");
-                    LocalizationManager.SetDatabase(dict);
+                    LocalizationManager.SetDatabase(handle.Result.ToDictionary());
                     return true;
                 }
             }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"{TAG} Addr load EXC: {e}");
-            }
         }
+        catch (Exception e) { Debug.LogWarning($"[Localization] Local Addressables skip: {e.Message}"); }
 
-        try
+        var dbSO = Resources.Load<LocalizationDatabase>(RES_PATH);
+        if (dbSO != null)
         {
-            var dbSO = Resources.Load<LocalizationDatabase>(RES_PATH);
-            if (dbSO != null)
-            {
-                var dict = dbSO.ToDictionary();
-                LogDbPreview(dict, "RES");
-                LocalizationManager.SetDatabase(dict);
-                return true;
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"{TAG} Resources EXC: {e}");
+            LocalizationManager.SetDatabase(dbSO.ToDictionary());
+            return true;
         }
 
         return false;
     }
 
-    private async UniTask LoadRemote(bool updateExisting)
+    private async UniTask LoadRemoteTranslations()
     {
-        if (string.IsNullOrEmpty(_url))
-        {
-            Debug.LogWarning($"{TAG} Remote URL is empty");
-            return;
-        }
-
-        string url = UrlUtil.WithCacheBuster(_url);
+        if (string.IsNullOrEmpty(_locUrl)) return;
+        string url = UrlUtil.WithCacheBuster(_locUrl);
         string json = await _remote.Fetch(url);
 
         if (string.IsNullOrWhiteSpace(json))
         {
-            Debug.LogWarning($"{TAG} Remote fetch failed/null (в WebGL это часто CORS — проверь заголовки на хостинге)");
+            Debug.LogError($"[Localization] Remote JSON is empty! URL: {_locUrl}");
             return;
         }
 
         try
         {
             var db = ParseLocalizationJson(json);
-            LogDbPreview(db, "REMOTE");
+            Debug.Log($"[Localization] Remote loaded. Languages: {db.Count}");
+            if (db.Count > 0)
+            {
+                var firstLang = db.First().Value;
+                Debug.Log($"[Localization] KEYS SAMPLE: {string.Join(", ", firstLang.Keys.Take(5))}");
+            }
             LocalizationManager.SetDatabase(db);
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"{TAG} Parse/apply EXC: {e}");
+            Debug.LogError($"[Localization] JSON Parse Error: {e}");
+        }
+    }
+
+    private async UniTask LoadRemoteFonts()
+    {
+        if (string.IsNullOrEmpty(_fontsUrl)) return;
+        string url = UrlUtil.WithCacheBuster(_fontsUrl);
+        string json = await _remote.Fetch(url);
+
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            try
+            {
+                var dict = JObject.Parse(json).ToObject<Dictionary<string, object>>();
+                _fontService.UpdateConfig(dict);
+            }
+            catch (Exception e) { Debug.LogError($"[Localization] Fonts Config Error: {e}"); }
         }
     }
 
@@ -161,7 +141,7 @@ public class LocalizationService : IInitializable
         return db;
     }
 
-    private void Flatten(Newtonsoft.Json.Linq.JToken token, string prefix, Dictionary<string, string> output)
+    private void Flatten(JToken token, string prefix, Dictionary<string, string> output)
     {
         if (token is JObject obj)
         {
@@ -172,11 +152,5 @@ public class LocalizationService : IInitializable
         {
             output[prefix] = val.ToString();
         }
-    }
-
-    private static void LogDbPreview(Dictionary<string, Dictionary<string, string>> db, string tag)
-    {
-        var langs = db?.Keys?.ToList() ?? new List<string>();
-        var entries = db?.Sum(kv => kv.Value?.Count ?? 0) ?? 0;
     }
 }

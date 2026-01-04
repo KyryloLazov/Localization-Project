@@ -8,26 +8,25 @@ public class LanguageDropdown : MonoBehaviour
 
     private TMP_Dropdown _dropdown;
     private bool _placeholderActive;
-    public bool IsLanguageChosen => !_placeholderActive || _dropdown.value >= 0;
-    public string SelectedLanguage =>
-        _placeholderActive && _dropdown.value == 0 ? null : _dropdown.options[_dropdown.value].text;
-
+    
     private void Awake()
     {
         _dropdown = GetComponent<TMP_Dropdown>();
         _dropdown.onValueChanged.AddListener(OnLanguageDropdownValueChanged);
+        
         LocalizationManager.OnLanguageChanged += RefreshDropdownSelection;
-        Initialize();
+        LocalizationManager.OnContentChanged += RefreshDropdownOptions;
+    }
+
+    private void Start()
+    {
+        RefreshDropdownOptions();
     }
 
     private void OnDestroy()
     {
         LocalizationManager.OnLanguageChanged -= RefreshDropdownSelection;
-    }
-
-    private void Initialize()
-    {
-        RefreshDropdownOptions();
+        LocalizationManager.OnContentChanged -= RefreshDropdownOptions;
     }
 
     private void RefreshDropdownOptions()
@@ -42,15 +41,26 @@ public class LanguageDropdown : MonoBehaviour
             _dropdown.options.Add(new TMP_Dropdown.OptionData("--Language--"));
             _placeholderActive = true;
         }
-
-        _dropdown.AddOptions(languages.Select(l => new TMP_Dropdown.OptionData(l)).ToList());
-        _dropdown.SetValueWithoutNotify(_placeholderActive ? 0 : GetCurrentLanguageIndex(languages));
+        else
+        {
+            _placeholderActive = false;
+        }
+        
+        var options = languages.Select(l => 
+        {
+            string label = char.ToUpper(l[0]) + l.Substring(1);
+            return new TMP_Dropdown.OptionData(label);
+        }).ToList();
+        
+        _dropdown.AddOptions(options);
+        
+        RefreshDropdownSelection();
     }
 
     private int GetCurrentLanguageIndex(System.Collections.Generic.List<string> languages)
     {
         string current = LocalizationManager.CurrentLanguage;
-        int index = languages.IndexOf(current);
+        int index = languages.FindIndex(l => l.Equals(current, System.StringComparison.OrdinalIgnoreCase));
         return index < 0 ? 0 : index;
     }
 
@@ -59,42 +69,37 @@ public class LanguageDropdown : MonoBehaviour
         var languages = LocalizationManager.GetSupportedLanguages();
         if (languages.Count == 0) return;
 
+        int index = GetCurrentLanguageIndex(languages);
+        
         if (_placeholderActive)
         {
-            _dropdown.SetValueWithoutNotify(0);
-            return;
+            _dropdown.SetValueWithoutNotify(index + 1);
         }
-
-        int index = GetCurrentLanguageIndex(languages);
-        _dropdown.SetValueWithoutNotify(index);
+        else
+        {
+            _dropdown.SetValueWithoutNotify(index);
+        }
+        
+        _dropdown.RefreshShownValue();
     }
 
     private void OnLanguageDropdownValueChanged(int value)
     {
         if (_placeholderActive && value == 0) return;
 
-        if (value > 0 && value < _dropdown.options.Count)
-        {
-            string lang = _dropdown.options[value].text;
-            LocalizationManager.CurrentLanguage = lang;
+        int realIndex = _placeholderActive ? value - 1 : value;
+        var languages = LocalizationManager.GetSupportedLanguages();
 
+        if (realIndex >= 0 && realIndex < languages.Count)
+        {
+            string langCode = languages[realIndex];
+            LocalizationManager.CurrentLanguage = langCode;
+            
             if (_placeholderActive)
             {
                 _placeholderActive = false;
-                RemovePlaceholder();
+                RefreshDropdownOptions(); 
             }
-        }
-    }
-
-    private void RemovePlaceholder()
-    {
-        if (_dropdown.options.Count > 0 && _dropdown.options[0].text == "--Language--")
-        {
-            _dropdown.options.RemoveAt(0);
-            _dropdown.RefreshShownValue();
-
-            int index = _dropdown.options.FindIndex(o => o.text == LocalizationManager.CurrentLanguage);
-            _dropdown.SetValueWithoutNotify(index >= 0 ? index : 0);
         }
     }
 }
