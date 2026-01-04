@@ -98,31 +98,22 @@ public sealed class LocalizationFontService : IDisposable
             try
             {
                 Font osFont = Font.CreateDynamicFontFromOSFont(fontName, 16);
-                if (osFont) loaded = TMP_FontAsset.CreateFontAsset(osFont);
+                if (osFont) 
+                {
+                    loaded = TMP_FontAsset.CreateFontAsset(osFont);
+                    loaded.name = fontName; 
+                }
             }
             catch {}
         }
 
         if (loaded)
         {
-            if (loaded.material == null || loaded.material.shader == null)
+            if (loaded.atlasPopulationMode != AtlasPopulationMode.Dynamic)
             {
-                var newMat = new Material(Shader.Find("TextMeshPro/Distance Field"));
-                newMat.mainTexture = loaded.atlasTexture;
-                loaded.material = newMat;
-            }
-            else
-            {
-                if (loaded.material.mainTexture == null && loaded.atlasTexture)
-                    loaded.material.mainTexture = loaded.atlasTexture;
+                loaded.atlasPopulationMode = AtlasPopulationMode.Dynamic;
             }
             
-            loaded.material = new Material(loaded.material);
-            Shader s = Shader.Find("TextMeshPro/Distance Field");
-            if (s && loaded.material.shader != s)
-                loaded.material.shader = s;
-
-            loaded.atlasPopulationMode = AtlasPopulationMode.Dynamic;
             _fontAssetCache[fontName] = loaded;
         }
         return loaded;
